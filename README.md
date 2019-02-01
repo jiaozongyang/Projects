@@ -1,2 +1,5 @@
 # Projects
-This is my first project
+
+Hi Welcome! 
+
+I am a student in Business Analytics, University of Southern California. 
