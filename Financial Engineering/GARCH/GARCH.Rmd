@@ -1,0 +1,164 @@
+---
+title: "Building GARCH Model to Estimate Volatilites"
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Overview
+
+This is an example of using GARCH model to estimate volatilities of S&P500 index. I divide the analysis into following steps: <br />
+1. Data Prearation and Cleaning <br />
+2. Data Visualization <br />
+3. GARCH Modeling <br />
+4. Forecast and Estimate <br /> 
+
+### Data Preparation and Cleaning
+```{r message=FALSE, warning=FALSE}
+library(tidyverse)
+library(tseries)
+df = read.csv('sp500.csv', header = TRUE)
+```
+
+```{r}
+head(df)
+df$date = as.Date(df$date, format = "%m/%d/%Y") 
+
+```
+
+```{r}
+n = nrow(df)
+ret = df$price[-1]/df$price[-n] -1
+col3 = c(NA, ret)
+df2 = data.frame(df, ret = col3)
+```
+
+
+### Data Visualization
+```{r}
+plot(price~date, df, type = 'l',ylim = c(0,1800), ylab = "S&P500", xlab = "", main = "S&P500 Index Trend")
+```
+
+
+```{r}
+plot(ret~date, df2, type = 'p', ylab = "S&P500 Return", xlab = "")
+```
+
+
+```{r}
+hist(df2$ret, xlab = "S&P500 Return",main = "Distribution of S&P500 Return",ylab = "")
+```
+
+### GARCH Modeling
+```{r echo=TRUE, results='hide'}
+# build garch model
+ml = garch(ret)
+```
+
+```{r}
+# Extract parameters
+
+w = coef(ml)[1]   #gamma
+a = coef(ml)[2]   #alpha
+b = coef(ml)[3]   #beta
+varlong = w/(1-a-b) # long term variance
+
+```
+
+
+```{r}
+summary(ml)
+```
+```{r}
+# display the atrributes of ml
+str(ml)
+```
+
+```{r}
+# fitted daily volatilities
+fit = ml$fitted.values[-1,1]
+head(fit)
+```
+
+
+```{r}
+dates = df$date[-c(1,2)]
+```
+
+
+```{r}
+plot(fit~dates, type = 'l', ylim = c(0,0.06), xlab="",ylab = "Estimated Volatily",main = "Estimated S&P500 Volatility v.s. Long-term Volatility")
+abline(h = sqrt(varlong), lty = 2, col = 'red')
+
+```
+
+
+```{r}
+# autrocorrelation for squared returns
+ret2 = ret^2
+m2 = acf(ret2, lag.max = 15)
+
+# if lag is within blue band, it is white noise
+col1 = m2$acf
+
+```
+
+
+```{r}
+# autocorrelation for the ratio of squared return over fitted daily variance
+ratio = ret2[-1]/fit^2
+m3 = acf(ratio,15)
+col2 = m3$acf[-1]
+```
+
+
+```{r}
+# table
+col1 = m2$acf[-1]
+col2 = m3$acf[-1]
+df3 = data.frame(ret2 = col1, ratio = col2)
+print(df3)
+```
+
+```{r}
+#ljung box test for squared return
+Box.test(ret2, lag = 15, type = "Ljung-Box")
+```
+
+
+```{r}
+# ljung box test for ratio
+Box.test(ratio, lag = 15, type = 'Ljung-Box')
+```
+
+
+### Forecast and Estimate
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
