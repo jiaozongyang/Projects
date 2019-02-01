@@ -10,15 +10,15 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## Overview
+Overview
 
-This is an example of using GARCH model to estimate volatilities of S&P500 index. I divide the analysis into following steps: <br />
-1. Data Prearation and Cleaning <br />
-2. Data Visualization <br />
-3. GARCH Modeling <br />
-4. Forecast and Estimate <br /> 
+This is an example of using GARCH model to estimate volatilities of S&P500 index. I divide the analysis into following steps: 
+1. Data Prearation and Cleaning 
+2. Data Visualization 
+3. GARCH Modeling 
+4. Forecast and Estimate 
 
-### Data Preparation and Cleaning
+Data Preparation and Cleaning
 ```{r message=FALSE, warning=FALSE}
 library(tidyverse)
 library(tseries)
@@ -39,7 +39,7 @@ df2 = data.frame(df, ret = col3)
 ```
 
 
-### Data Visualization
+Data Visualization
 ```{r}
 plot(price~date, df, type = 'l',ylim = c(0,1800), ylab = "S&P500", xlab = "", main = "S&P500 Index Trend")
 ```
@@ -54,7 +54,7 @@ plot(ret~date, df2, type = 'p', ylab = "S&P500 Return", xlab = "")
 hist(df2$ret, xlab = "S&P500 Return",main = "Distribution of S&P500 Return",ylab = "")
 ```
 
-### GARCH Modeling
+GARCH Modeling
 ```{r echo=TRUE, results='hide'}
 # build garch model
 ml = garch(ret)
@@ -137,7 +137,7 @@ Box.test(ratio, lag = 15, type = 'Ljung-Box')
 ```
 
 
-### Forecast and Estimate
+Forecast and Estimate
 
 
 
