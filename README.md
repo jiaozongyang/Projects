@@ -15,4 +15,4 @@ Even though I don't have a background in CS, I do find that understanding algori
 
 Financial Engineering:
 
-Since I come from Finance background, I have always enjoyed surfing in financial market. This semester I am taking Financial Engineering in engineering school. The course includes a variety of concepts and theories that I have learned before. However, in this course I have the chance to use R to deal with real world data with the theories and models. Combining finance and programming is the ONE thing that I enjoy most.
+Since I come from Finance background, I have always enjoyed surfing in financial market. This semester I am taking Financial Engineering in engineering school. The course includes a variety of concepts and theories that I have learned before. In addition, in this course I have the chance to use R to deal with real world data using the theories and models. Combining finance and programming is the ONE thing that I enjoy most.
