@@ -14,21 +14,23 @@ Overview
 
 This is an example of using GARCH model to estimate volatilities of S&P500 index. I divide the analysis into following steps: 
 1. Data Prearation and Cleaning 
-2. Data Visualization 
-3. GARCH Modeling 
-4. Forecast and Estimate 
+2. Data Visualization
+3. Variable Testing
+4. GARCH Modeling 
+
 
 Data Preparation and Cleaning
+
 ```{r message=FALSE, warning=FALSE}
 library(tidyverse)
 library(tseries)
+library(TSA)
 df = read.csv('sp500.csv', header = TRUE)
 ```
 
 ```{r}
 head(df)
 df$date = as.Date(df$date, format = "%m/%d/%Y") 
-
 ```
 
 ```{r}
@@ -40,6 +42,7 @@ df2 = data.frame(df, ret = col3)
 
 
 Data Visualization
+
 ```{r}
 plot(price~date, df, type = 'l',ylim = c(0,1800), ylab = "S&P500", xlab = "", main = "S&P500 Index Trend")
 ```
@@ -53,6 +56,42 @@ plot(ret~date, df2, type = 'p', ylab = "S&P500 Return", xlab = "")
 ```{r}
 hist(df2$ret, xlab = "S&P500 Return",main = "Distribution of S&P500 Return",ylab = "")
 ```
+
+
+Variable Testing
+```{r}
+qqnorm(df2$ret)
+qqline(df2$ret)
+```
+
+Shapiro-Wilk Test of Normality
+The result shows that return of S&P500 does not follow normal distribution.
+```{r}
+shapiro.test(df2$ret)
+```
+
+Use acf and pacf to identify time-correlation of daily returns/squared returns.
+```{r}
+ret2 = (df2$ret[-1])^2
+par(mfrow= c(2,2))
+acf(ret,lag.max = 15)
+acf(ret2, lag.max = 15)
+pacf(ret, lag.max = 15)
+pacf(ret2, lag.max = 15)
+```
+
+Use t-test on whether mean return is equal to zero.
+Since p-value is larger than 0.05, we fail to reject null hypothesis that mean return is equal to zero.
+```{r}
+t.test(ret,mu=0)
+```
+
+Use McLeod-Li Test on whether daily volatility is constant.
+p-value for different lags are all less than 0.05, therefore we have confidence to reject null hypothesis that daily volatility is constant.
+```{r}
+McLeod.Li.test(y = ret, plot = T, gof.lag=15)
+```
+
 
 GARCH Modeling
 ```{r echo=TRUE, results='hide'}
@@ -81,20 +120,34 @@ str(ml)
 
 ```{r}
 # fitted daily volatilities
-fit = ml$fitted.values[-1,1]
-head(fit)
+vfit = ml$fitted.values[-1,1]
+head(vfit)
+```
+
+```{r}
+par(mfrow = c(2,1))
+plot(df2$price, type="l",ylab = "Price", xlab = "")
+plot(ret, type = "l", ylab = "Return", xlab = "")
 ```
 
 
 ```{r}
 dates = df$date[-c(1,2)]
+plot(vfit~dates, type = 'l', ylim = c(0,0.06), xlab="",ylab = "Estimated Volatily",main = "Estimated S&P500 Volatility v.s. Long-term Volatility")
+abline(h = sqrt(varlong), lty = 2, col = 'red')
+
+```
+
+Test of Residual
+```{r}
+plot(residuals(ml),type = "h", ylab = "standard residuals")
 ```
 
 
 ```{r}
-plot(fit~dates, type = 'l', ylim = c(0,0.06), xlab="",ylab = "Estimated Volatily",main = "Estimated S&P500 Volatility v.s. Long-term Volatility")
-abline(h = sqrt(varlong), lty = 2, col = 'red')
-
+par(mfrow = c(2,1))
+acf(residuals(ml)[-1])
+pacf(residuals(ml)[-1])
 ```
 
 
@@ -111,7 +164,7 @@ col1 = m2$acf
 
 ```{r}
 # autocorrelation for the ratio of squared return over fitted daily variance
-ratio = ret2[-1]/fit^2
+ratio = ret2[-1]/vfit^2
 m3 = acf(ratio,15)
 col2 = m3$acf[-1]
 ```
@@ -137,7 +190,6 @@ Box.test(ratio, lag = 15, type = 'Ljung-Box')
 ```
 
 
-Forecast and Estimate
 
 
 
