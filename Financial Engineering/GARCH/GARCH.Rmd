@@ -10,7 +10,7 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-Overview
+##Overview
 
 This is an example of using GARCH model to estimate volatilities of S&P500 index. I divide the analysis into following steps: 
 1. Data Prearation and Cleaning 
@@ -19,12 +19,13 @@ This is an example of using GARCH model to estimate volatilities of S&P500 index
 4. GARCH Modeling 
 
 
-Data Preparation and Cleaning
+##Data Preparation and Cleaning
 
 ```{r message=FALSE, warning=FALSE}
 library(tidyverse)
 library(tseries)
 library(TSA)
+library(forecast)
 df = read.csv('sp500.csv', header = TRUE)
 ```
 
@@ -41,7 +42,7 @@ df2 = data.frame(df, ret = col3)
 ```
 
 
-Data Visualization
+##Data Visualization
 
 ```{r}
 plot(price~date, df, type = 'l',ylim = c(0,1800), ylab = "S&P500", xlab = "", main = "S&P500 Index Trend")
@@ -58,7 +59,7 @@ hist(df2$ret, xlab = "S&P500 Return",main = "Distribution of S&P500 Return",ylab
 ```
 
 
-Variable Testing
+##Variable Testing
 ```{r}
 qqnorm(df2$ret)
 qqline(df2$ret)
@@ -72,13 +73,17 @@ shapiro.test(df2$ret)
 
 Use acf and pacf to identify time-correlation of daily returns/squared returns.
 ```{r}
-ret2 = (df2$ret[-1])^2
-par(mfrow= c(2,2))
-acf(ret,lag.max = 15)
-acf(ret2, lag.max = 15)
-pacf(ret, lag.max = 15)
-pacf(ret2, lag.max = 15)
+tsdisplay(ret)
 ```
+
+
+```{r}
+ret2 = (df2$ret[-1])^2
+tsdisplay(ret2)
+
+```
+
+
 
 Use t-test on whether mean return is equal to zero.
 Since p-value is larger than 0.05, we fail to reject null hypothesis that mean return is equal to zero.
@@ -93,7 +98,7 @@ McLeod.Li.test(y = ret, plot = T, gof.lag=15)
 ```
 
 
-GARCH Modeling
+##GARCH Modeling
 ```{r echo=TRUE, results='hide'}
 # build garch model
 ml = garch(ret)
@@ -125,7 +130,7 @@ head(vfit)
 ```
 
 ```{r}
-par(mfrow = c(2,1))
+#par(mfrow = c(2,1))
 plot(df2$price, type="l",ylab = "Price", xlab = "")
 plot(ret, type = "l", ylab = "Return", xlab = "")
 ```
@@ -143,11 +148,8 @@ Test of Residual
 plot(residuals(ml),type = "h", ylab = "standard residuals")
 ```
 
-
 ```{r}
-par(mfrow = c(2,1))
-acf(residuals(ml)[-1])
-pacf(residuals(ml)[-1])
+tsdisplay(residuals(ml)[-1])
 ```
 
 

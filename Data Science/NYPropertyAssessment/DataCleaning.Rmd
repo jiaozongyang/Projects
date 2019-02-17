@@ -1,0 +1,297 @@
+---
+title: "DataCleaning"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+```{r}
+library(dplyr)
+library(tidyverse)
+library(zoo)
+library(data.table)
+```
+
+
+```{r}
+df = read.csv("/Users/zongyangjiao/Desktop/DSO562_Fraud Analytics/project1/NY_property.csv",
+              header = T, stringsAsFactors = F)
+
+df = df[,c('BBLE','FULLVAL','AVLAND','AVTOT','B','BLOCK','BLDGCL','TAXCLASS','ZIP','LTFRONT','LTDEPTH', 'BLDFRONT','BLDDEPTH','STORIES')]
+```
+
+```{r}
+head(df)
+```
+
+```{r}
+str(df)
+```
+
+```{r}
+#df$B = as.factor(df$B)
+#df$BLOCK = as.factor(df$BLOCK)
+#df$TAXCLASS = as.factor(df$TAXCLASS)
+#df$BLDGCL =  as.factor(df$BLDGCL)
+df[df==0] <- NA
+
+```
+
+Define getmode function
+```{r}
+getmode <- function(v) {
+   uniqv <- unique(v)
+   uniqv[which.max(tabulate(match(v, uniqv)))]
+}
+```
+
+First, fill ZIP missing value using the mode grouping by B and BLOCK. Then I find that for some B and BLOCK, all the records have NA value in ZIP. Therefore, I use the mode of each B to fill the rest.
+```{r}
+df <- df %>%
+  group_by(B,BLOCK) %>%
+  mutate(ZIP = na.aggregate(ZIP, FUN=getmode)) %>%
+  ungroup() %>%
+  group_by(B) %>%
+  mutate(ZIP = na.aggregate(ZIP, FUN = getmode)) %>%
+  ungroup() 
+  
+# There are still 2448 missing values in ZIP after first filling
+
+sum(is.na(df$ZIP))
+```
+FULLVAL, AVLAND, AVTOT
+
+```{r}
+df <- df %>%
+  group_by(BLDGCL, ZIP) %>%
+  mutate(FULLVAL = na.aggregate(FULLVAL, FUN = median)) %>%
+  ungroup() %>%
+  group_by(ZIP) %>%
+  mutate(FULLVAL = na.aggregate(FULLVAL, FUN = median)) %>%
+  ungroup()
+  
+
+# There are 10201 NA values in FULLVAL after first filling
+
+sum(is.na(df$FULLVAL))
+
+```
+
+```{r}
+df <- df %>%
+  group_by(BLDGCL, ZIP) %>%
+  mutate(AVLAND = na.aggregate(AVLAND, FUN = median)) %>%
+  ungroup() %>%
+  group_by(ZIP) %>%
+  mutate(AVLAND = na.aggregate(AVLAND, FUN = median)) %>%
+  ungroup()
+  
+# There are 10201 NA values in AVLAND after first filling
+
+sum(is.na(df$AVLAND))
+```
+
+```{r}
+df <- df %>%
+  group_by(BLDGCL, ZIP) %>%
+  mutate(AVTOT = na.aggregate(AVTOT, FUN = median)) %>%
+  ungroup() %>%
+  group_by(ZIP) %>%
+  mutate(AVTOT = na.aggregate(AVTOT, FUN = median)) %>%
+  ungroup()
+
+# There are 10201 NA values in AVTOT
+
+sum(is.na(df$AVTOT))
+```
+
+LTFRONT, LTDEPTH, BLDFRONT, BLDDEPTH
+
+LTFRONT
+
+
+```{r}
+df <- df %>%
+  group_by(BLDGCL,ZIP) %>%
+  mutate(LTFRONT = na.aggregate(LTFRONT, FUN = median)) %>%
+  ungroup() %>%
+  group_by(BLDGCL) %>%
+  mutate(LTFRONT = na.aggregate(LTFRONT, FUN = median)) %>%
+  ungroup()
+
+# There are 15868 NA values in LTFRONT after first filling
+sum(is.na(df$LTFRONT))
+
+```
+LTDEPTH
+```{r}
+df <- df %>%
+  group_by(BLDGCL,ZIP) %>%
+  mutate(LTDEPTH = na.aggregate(LTDEPTH, FUN = median)) %>%
+  ungroup() %>%
+  group_by(BLDGCL) %>%
+  mutate(LTDEPTH = na.aggregate(LTDEPTH, FUN = median)) %>%
+  ungroup()
+
+# There are 17605 NA values in LTDEPTH after first filling
+
+sum(is.na(df$LTDEPTH))
+```
+BLDFRONT
+```{r}
+df <- df %>%
+  group_by(BLDGCL,ZIP) %>%
+  mutate(BLDFRONT = na.aggregate(BLDFRONT, FUN = median)) %>%
+  ungroup() %>%
+  group_by(BLDGCL) %>%
+  mutate(BLDFRONT = na.aggregate(BLDFRONT, FUN = median)) %>%
+  ungroup() %>%
+  group_by(ZIP) %>%
+  mutate(BLDFRONT = na.aggregate(BLDFRONT, FUN = median)) %>%
+  ungroup()
+
+# There are 74663 NA values in BLDFRONT after first filling
+
+# There are still 4280 NA values after second filling
+
+sum(is.na(df$BLDFRONT))
+
+```
+
+```{r}
+df <- df %>%
+  group_by(BLDGCL,ZIP) %>%
+  mutate(BLDDEPTH = na.aggregate(BLDDEPTH, FUN = median)) %>%
+  ungroup() %>%
+  group_by(BLDGCL) %>%
+  mutate(BLDDEPTH = na.aggregate(BLDDEPTH, FUN = median)) %>%
+  ungroup() %>%
+  group_by(ZIP) %>%
+  mutate(BLDDEPTH = na.aggregate(BLDDEPTH, FUN = median)) %>%
+  ungroup()
+
+#There are 74660 NA values in BLDDEPTH after first filling
+
+#There are 3281 NA values in BLDDEPTH after second filling
+
+sum(is.na(df$BLDDEPTH))
+```
+
+
+STORIES
+```{r}
+df <- df %>%
+  group_by(BLDGCL,ZIP) %>%
+  mutate(STORIES = na.aggregate(STORIES, FUN = median)) %>%
+  ungroup() %>%
+  group_by(BLDGCL) %>%
+  mutate(STORIES = na.aggregate(STORIES, FUN = median)) %>%
+  ungroup() %>%
+  group_by(ZIP) %>%
+  mutate(STORIES = na.aggregate(STORIES, FUN = median)) %>%
+  ungroup()
+
+#There are 41742 NA values in STORIES after first filling
+
+# There are 4280 NA values in STORIES after second filling
+
+sum(is.na(df$STORIES))
+
+```
+
+```{r}
+any(is.na(df))
+```
+
+
+```{r}
+#Create a copy just in case
+dfcopy <- copy(df)
+```
+
+Create expert variable
+```{r}
+df <- df %>%
+  mutate(LTAREA = LTFRONT * LTDEPTH,
+         BLDAREA = BLDFRONT * BLDDEPTH,
+         BLDVOL = BLDAREA * STORIES,
+         ZIP3 = ZIP %/% 100)
+
+tail(df)
+```
+
+```{r}
+df_new = subset(df, select = -c(BLOCK,BLDGCL,LTFRONT,LTDEPTH,BLDFRONT,BLDDEPTH,STORIES))
+
+head(df_new)
+```
+
+
+```{r}
+for (value in c("FULLVAL","AVLAND","AVTOT")){
+  for (area in c('LTAREA','BLDAREA','BLDVOL')){
+    name = paste(value,area, sep = "_",collapse = NULL)
+    df_new[[name]] = df_new[[value]] / df_new[[area]]
+  }
+}
+```
+
+
+```{r}
+head(df_new)
+```
+
+```{r}
+df_new = subset(df_new, select = -c(FULLVAL, AVLAND, AVTOT, LTAREA, BLDAREA, BLDVOL))
+write_csv(df_new, "UnfinishedCleaningData.csv")
+
+# Test
+test = read_csv("UnfinishedCleaningData.csv")
+dim(test) == dim(df_new)
+```
+
+After this line, use Python!!! 
+-----------------------------------------------------
+```{r}
+
+for (value in colnames(df_new)[c(5:13)]){
+  for (group in colnames(df_new)[c(1:4)]){
+    name = paste(value,group, sep = "_",collapse = NULL)
+    df_new <- df_new %>%
+      group_by_(group) %>%
+      mutate_(avg = mean(value))
+  }
+}
+
+
+```
+
+```{r}
+df_new %>%
+  group_by(B) %>%
+  mutate(avg = mean(FULLVAL_LTAREA)) %>%
+  ungroup() %>%
+  mutate(FULLVAL_LTAREA_B = FULLVAL_LTAREA/avg) %>%
+  select(-avg)
+
+```
+
+```{r}
+df_new %>%
+  group_by(B) %>%
+  summarise(avg = mean(FULLVAL_LTAREA)) %>%
+  right_join(y = df_new, by = 'B') %>%
+  mutate(FULLVAL_LTAREA_B = FULLVAL_LTAREA/avg) %>%
+  select(-avg)
+
+
+```
+
+
+
+
+
