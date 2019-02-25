@@ -7,7 +7,7 @@ from IPython import get_ipython
 get_ipython().run_line_magic('matplotlib', 'inline')
 
 # Read data and create 45 expert variables
-df = pd.read_csv('/Users/zongyangjiao/Dropbox/DSO 562 Fraud Analytics/Personal_Files/Zongyang_Jiao/UnfinishedCleaningData.csv')
+df = pd.read_csv('UnfinishedCleaningData.csv')
 
 
 def CreateExpertVariable(df):
@@ -60,17 +60,21 @@ PCAPlot(model2)
 df_transformed = model2.transform(df_scale_1)
 df_scale_2 = scale(df_transformed)
 
-#df_output = pd.DataFrame(df_scale_2)
+df_output = pd.DataFrame(df_scale_2)
 #df_output.to_csv("ReadyForScore.csv")
 
+
+# Build Score 1 using Heuristic Function
+
+score_1 = np.sqrt(np.square(df_output).sum(axis=1))
+    
+# Build Score 2 using Autoencoder
 
 from keras.models import Model, load_model
 from keras.layers import Input, Dense
 
 #df = pd.read_csv('ReadyForScore.csv')
 #df = df.iloc[:,1:]
-
-
 
 # Build the model
 encoding_dim = 4
@@ -91,3 +95,41 @@ autoencoder.fit(df_scale_2, df_scale_2,
                 shuffle=True)
 
 prediction = autoencoder.predict(df_scale_2)
+
+# pred = pd.DataFrame(prediction)
+# pred.to_csv('prediction.csv')
+
+score_2 = np.sqrt(np.square(prediction - df_scale_2).sum(axis=1))
+
+# Create Score dataframe and Score Ranking
+def ScoreandRanking():
+    score = pd.DataFrame()
+    score['BBLE'] = df['BBLE']
+    socre["score1"] = score_1
+    socre["score2"] = score_2
+    
+    score = score.sort_values('score1')
+    score['ranking_1'] = np.arange(1, df_new.shape[0]+1)
+    score = score.sort_values('score2')
+    score['ranking_2'] = np.arange(1,df_new.shape[0]+1)
+    score['combined_ranking'] = score['ranking_1'] + score['ranking_2']
+    score = score.sort_values('combined_ranking',ascending=False)
+
+    return score
+
+# Score Distribution
+plt.hist(score['score_1'],bins=30)
+plt.xlabel('Fraud Score 1 (Heuristic Function)')
+plt.ylabel('Count')
+plt.title('The Distribution of Fraud Score 1 (Heuristic Function)')
+plt.yscale('log');
+
+plt.hist(score['score_2'],bins=30)
+plt.xlabel('Fraud Score 2 (Autoencoder)')
+plt.ylabel('Count')
+plt.title('The Distribution of Fraud Score 2 (Autoencoder)')
+plt.yscale('log');
+
+
+
+
