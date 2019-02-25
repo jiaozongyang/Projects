@@ -101,7 +101,7 @@ prediction = autoencoder.predict(df_scale_2)
 
 score_2 = np.sqrt(np.square(prediction - df_scale_2).sum(axis=1))
 
-# Create Score dataframe and Score Ranking
+# Create Score dataframe and Score Ranking using Quantile binning
 def ScoreandRanking():
     score = pd.DataFrame()
     score['BBLE'] = df['BBLE']
@@ -116,6 +116,8 @@ def ScoreandRanking():
     score = score.sort_values('combined_ranking',ascending=False)
 
     return score
+
+ScoreandRanking()
 
 # Score Distribution
 plt.hist(score['score_1'],bins=30)
