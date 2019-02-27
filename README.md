@@ -2,12 +2,12 @@
 
 Hi Welcome! 
 
-I am currently a first-year student in Business Analytics, University of Southern California. I will use this github site to display projects and share thoughts in my master study. The repository is divided into three categories: data science, computer science and financial engineering. In each file, I will upload some small programs I wrote in online courses or  
-team projects I do with my teammates within my master curriculum.
+I am currently a first-year student in Business Analytics, University of Southern California. I will use this github site to display projects and share thoughts in my master study. The repository is divided into four categories: data science, computer science, financial engineering and project. In each file, I will upload some small programs I wrote in online courses or  
+projects I do with my teammates within my master curriculum.
 
 Data Science:
 
-My major is strongly associated with data science, so I have plenty of opportuniteis to use machine learning to solve real business problems. In the meantime, I also want to figure out the algorithms behind each method. Therefore, I am taking Machine Learning Fundamentals (UCSanDiegoX-DSE220x) on edX, through which I can write the algorithms by myself. I will keep uploading codes along with my learning path.
+My major is strongly associated with data science, so I have plenty of opportuniteis to use machine learning to solve real business problems. In the meantime, I also want to figure out the algorithms behind each method. I have taken Machine Learning Fundamentals (UCSanDiegoX-DSE220x) on edX, through which I can write the algorithms by myself. Currently I am taking Machine Learning and Reinforcement Learning in Finance on Coursera.
 
 Computer Science:
 
